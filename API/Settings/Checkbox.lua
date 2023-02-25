@@ -4,6 +4,7 @@ function checkbox:new(title, defaultValue)
     local properties = {}
     properties.title = title
     properties.value = defaultValue
+    properties.click_handler = nil
     
     function properties:get_type()
         return 'checkbox'

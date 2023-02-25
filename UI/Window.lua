@@ -15,6 +15,36 @@ local mouse = game.Players.LocalPlayer:GetMouse()
 local gui = guiBuilder:new('Test')
 local frame = gui:add_frame(0, 0, 620, 420):centerize():set_background(Color3.fromRGB(36, 36, 36), 255):apply_rounding(6)
 
+-- Drag start
+local prevX, prevY = 0, 0
+local animatedX, animatedY = frame:get_x(), frame:get_y()
+local drag = false
+
+frame:get_component().InputBegan:Connect(function(input)
+    if (input.UserInputType == Enum.UserInputType.MouseButton1) then
+        prevX = mouse.X - frame:get_component().AbsolutePosition.X
+        prevY = mouse.Y - frame:get_component().AbsolutePosition.Y
+        drag = true
+    end
+end)
+
+frame:get_component().InputEnded:Connect(function(input)
+    if (input.UserInputType == Enum.UserInputType.MouseButton1) then
+        drag = false
+    end
+end)
+
+mouse.Move:Connect(function()
+    if (drag) then
+        animatedX = utils.lerp(animatedX, mouse.X - prevX, 0.2)
+        animatedY = utils.lerp(animatedY, mouse.Y - prevY, 0.2)
+
+        frame:set_x(animatedX)
+        frame:set_y(animatedY)
+    end
+end)
+-- Drag end
+
 local leftPanel = frame:add_frame(0, 0, 200, frame:get_height()):set_background(Color3.fromRGB(0, 0, 0), 0)
 leftPanel:add_image(12600570787, 12, 14, 35, 35)
 leftPanel:add_text('HUB', 58, 19):set_font(Enum.Font.ArialBold, 26)
@@ -93,11 +123,14 @@ function initSettings()
                     togglerX = 2
                 end
                 
-                booleanSetting:get_component().InputBegan:Connect(function(input)
+                table.insert(events, booleanSetting:get_component().InputBegan:Connect(function(input)
                     if (input.UserInputType == Enum.UserInputType.MouseButton1) then
                         setting:set_value(not setting:get_value())
+                        if (setting.click_handler ~= nil) then
+                            setting.click_handler()
+                        end
                     end
-                end)
+                end))
                 -- Toggler x animation
                 table.insert(events, renderEvent:Connect(function()
                     if (setting:get_value()) then
